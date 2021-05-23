@@ -13,7 +13,7 @@ variable "name" {
 
 variable "runtime" {
   type    = string
-  default = "PYTHON|3.8"
+  default = "Python|3.8"
 }
 
 variable "tags" {

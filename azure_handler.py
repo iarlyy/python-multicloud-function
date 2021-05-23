@@ -5,8 +5,8 @@ import azure.functions as func
 app = function.ServerlessApp()
 
 
-def handler(event: func.HttpRequest) -> func.HttpResponse:
-    msg = event.get_json(silent=True)['msg']
+def handler(req: func.HttpRequest) -> func.HttpResponse:
+    msg = req.get_json()['msg']
     return func.HttpResponse(
         app.process(msg),
         status_code=200

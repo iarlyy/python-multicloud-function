@@ -20,32 +20,29 @@ invoke-gcp:
 		--project $(gcp_project_name) \
 		--region $(gcp_region)
 
-invoke-all: invoke-aws invoke-gcp
+invoke-azure:
+	curl --data '$(shell cat events/azure_function.json)' \
+		$(shell cd terraform ; terraform output -raw azure_function_api_url)
+
+invoke-all: invoke-aws invoke-gcp invoke-azure
 
 .PHONY: build
 build:
 	@echo building && \
-	if [ -d ./build ]; then rm -rf ./build; fi && \
+	if [ -d $(build_folder_path) ]; then rm -rf $(build_folder_path); fi && \
 	mkdir $(build_folder_path) && \
+	cp -r *.json *.py function $(build_folder_path)/ && \
+	cd $(build_folder_path)/ && \
 	cp gcp_handler.py main.py && \
-	zip -r9 $(build_folder_path)/$(dist_package_filename) *.json *.py function/* && \
-	rm -f main.py
+	mkdir pythonmulticloud && \
+	zip -r9 $(dist_package_filename) *.json *.py function/* && \
+	cp -r *.json *.py function pythonmulticloud/ && \
+	zip -r -g $(dist_package_filename) pythonmulticloud/
 
-deploy-aws:
+deploy-multicloud:
 	@cd terraform && \
 	terraform init && \
 	terraform apply -var-file=$(terraform_values_path)
-
-deploy-azure:
-	@cd terraform
-	echo deploy-azure
-
-deploy-gcp:
-	@cd terraform
-	echo deploy-gcp
-
-deploy-multicloud: deploy-aws
-	@echo "Deployed!"
 
 destroy-multicloud:
 	@cd terraform && \
