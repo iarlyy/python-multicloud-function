@@ -25,6 +25,7 @@ resource "google_cloudfunctions_function" "this" {
 }
 
 data "google_iam_policy" "function_policy" {
+  count = var.create ? 1 : 0
   binding {
     role = "roles/cloudfunctions.invoker"
     members = [
@@ -34,8 +35,9 @@ data "google_iam_policy" "function_policy" {
 }
 
 resource "google_cloudfunctions_function_iam_policy" "policy" {
+  count          = var.create ? 1 : 0
   project        = google_cloudfunctions_function.this[0].project
   region         = google_cloudfunctions_function.this[0].region
   cloud_function = google_cloudfunctions_function.this[0].name
-  policy_data    = data.google_iam_policy.function_policy.policy_data
+  policy_data    = data.google_iam_policy.function_policy[0].policy_data
 }
